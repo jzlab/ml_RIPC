@@ -108,3 +108,6 @@ data/
 
 # Ignore vim swap files
 *.swp
+
+# Ignore vscode
+.vscode/
