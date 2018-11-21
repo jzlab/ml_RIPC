@@ -105,3 +105,6 @@ venv.bak/
 
 # ignore data folder
 data/
+
+# Ignore vim swap files
+*.swp
