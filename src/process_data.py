@@ -16,10 +16,16 @@ def fetch_data(file_id,filename,proj_path='/home/elijahc/dev/ml_ripc'):
 
     return fp
 
-def process_data(fn,proj_path='/home/elijahc/dev/ml_ripc',baseline='A'):
+def load_data(fn,proj_path='/home/elijahc/dev/ml_ripc'):
     fp = os.path.join(proj_path,fn)
     print('loading...'+fp)
     df = pd.read_csv(open(fp,mode='rb'),encoding='ISO-8859-1')
+
+    return df
+
+
+def process_data(fn,proj_path='/home/elijahc/dev/ml_ripc',normalize=None):
+    df = load_data(fn,proj_path)
 
     print('')
     print('restructuring to longform...')
@@ -28,8 +34,18 @@ def process_data(fn,proj_path='/home/elijahc/dev/ml_ripc',baseline='A'):
     cols = list(df.columns)
 
     rgx  = re.compile(r"(\d+)([A-L])")
-
     col_vec = list(filter(rgx.search,cols))
+
+    if normalize is not None:
+        baseline_rgx = re.compile(r"(\d+A)")
+        t_rgx = lambda l: re.compile(r"(\d+{}).?".format(l))
+        baseline = df[list(filter(baseline_rgx.search,cols))].as_matrix()
+        final = [ df[list(filter(t_rgx(l).search,cols))].as_matrix() for l in col_vec ]
+
+        if normalize=='log2_fc':
+            norm_mat = [np.log2(f/baseline) for f in final]
+        elif normalize=='fc':
+            norm_mat = [f/baseline for f in final]
 
     long_df = pd.melt(df,id_vars=['Name','Formula','Molecular Weight'],value_vars=col_vec)
     pt_tp = list(long_df.variable)
