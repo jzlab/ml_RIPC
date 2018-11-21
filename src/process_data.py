@@ -31,7 +31,7 @@ def load_data(fn,proj_path='/home/elijahc/dev/ml_ripc',normalize=None):
         t_rgx = lambda l: re.compile(r"(\d+{}).?".format(l))
         baseline = df[list(filter(baseline_rgx.search,cols))].as_matrix()
         print('baseline shape:',baseline.shape)
-        timestamps = ['A','B','C','D','E','F','G','H','I','J','K','L']
+        timestamps = ['A','B','C','D','E','F','G','H','I','J']
         t_cols = [ list(filter(t_rgx(l).search,cols)) for l in timestamps ]
         final = [ df[tc].as_matrix() for tc in t_cols ]
 
@@ -49,12 +49,16 @@ def load_data(fn,proj_path='/home/elijahc/dev/ml_ripc',normalize=None):
     return out_df
 
 def process_data(fn,proj_path='/home/elijahc/dev/ml_ripc',normalize=None):
-    df = load_data(fn,proj_path)
+    df = load_data(fn,proj_path,normalize)
 
+    cols = list(df.columns)
+
+    rgx  = re.compile(r"(\d+)([A-L])")
+    col_vec = list(filter(rgx.search,cols))
+    
     print('')
     print('restructuring to longform...')
     print('(this may take a while)')
-
 
     long_df = pd.melt(df,id_vars=['Name','Formula','Molecular Weight'],value_vars=col_vec)
     pt_tp = list(long_df.variable)
@@ -62,7 +66,7 @@ def process_data(fn,proj_path='/home/elijahc/dev/ml_ripc',normalize=None):
 
     long_df['timepoint']=tp_mat[:,1]
     long_df['pt']=tp_mat[:,0]
-    t_lookup = {k:v for k,v in zip(np.unique(tp_mat[:,1]),[0,0,2,4,6,8,10,20,30,45,60,60])}
+    t_lookup = {k:v for k,v in zip(np.unique(tp_mat[:,1]),[0,2,4,6,8,10,20,30,45,60])}
     long_df['min']=[t_lookup[m] for m in list(long_df.timepoint)]
     # long_df['sec']=[t_lookup[m]*60 for m in list(long_df.timepoint)]
 
