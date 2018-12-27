@@ -76,7 +76,7 @@ def process_data(fn,proj_path='/home/elijahc/dev/ml_ripc',normalize=None,cache='
         long_df['timepoint']=tp_mat[:,1]
         long_df['pt']=tp_mat[:,0].astype('int8')
         t_lookup = {k:v for k,v in zip(np.unique(tp_mat[:,1]),[0,2,4,6,8,10,20,30,45,60])}
-        long_df['min']=[t_lookup[m] for m in list(long_df.timepoint)]
+        long_df['min']=np.array([t_lookup[m] for m in list(long_df.timepoint)]).astype('int8')
         # long_df['sec']=[t_lookup[m]*60 for m in list(long_df.timepoint)]
         if cache is not None and isinstance(cache,str):
             pd.to_pickle(long_df,cache)
