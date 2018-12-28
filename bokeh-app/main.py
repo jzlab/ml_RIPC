@@ -4,9 +4,9 @@ import pandas as pd
 import numpy as np
 
 from bokeh.io import curdoc
-from bokeh.layers import row,column
-from bokeh.models import ColumnDataSource, Select
-from bokeh.pallets import Plasma256
+from bokeh.layouts import row,column
+from bokeh.models import ColumnDataSource, Select, Span
+from bokeh.palettes import Plasma256
 from bokeh.transform import log_cmap
 
 import bokeh.plotting as bp
@@ -22,11 +22,11 @@ def get_dataset(src, timepoint):
 def make_plot(source,title):
     p = bp.figure(tools="pan,wheel_zoom,reset,save",
                 toolbar_location=None,
-                xrange=(-6,6),yrange=(0,12))
+                x_range=(-6,6),y_range=(0,12))
 
     p.title.text = title
 
-    mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(volc_df['Molecular_Weight'].values) ,high=max(volc_df['Molecular_Weight'].values))
+    mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values))
 
     p.circle("log2fc_mean", "log10p-value", line_color=mapper,color=mapper,size=5,source=source)
     p.xaxis.axis_label = "Log_2 Fold Change"
@@ -61,9 +61,13 @@ def update_plot(attrname, old, new):
 
 timepoint = 2
 
-timepoint_select = Select(value=timepoint, title='Timepoint', options=[2,4,6,8,10,20,30,45,60])
+timepoint_select = Select(value=str(timepoint),
+        title='Timepoint',
+        options=[str(t) for t in [2,4,6,8,10,20,30,45,60]]
+        )
 
-df = pd.read_pickle(join(dirname(__file__), 'data','ripc_fc.pk'))
+df = pd.read_pickle(join(dirname(__file__), 'ripc_fc.pk'))
+print('loaded dataset')
 source = get_dataset(df,timepoint)
 plot = make_plot(source, "Volcano plot for @ {}min".format(timepoint))
 
