@@ -111,3 +111,6 @@ data/
 
 # Ignore vscode
 .vscode/
+
+# Mac file caching
+.DS_Store
