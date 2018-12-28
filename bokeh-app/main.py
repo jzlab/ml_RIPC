@@ -49,7 +49,7 @@ def make_volcano_plot(source,title):
     return p
 
 def make_cluster_plot(source,title):
-    p = bp.figure(tools='pan,lasso_select,save,reset,wheel_zoom', x_range=(-100,55), y_range=(-55,100))
+    p = bp.figure(tools='pan,lasso_select,save,reset,wheel_zoom', x_range=(-100,100), y_range=(-100,100))
     p.hover.tooltips = [
         ("Molecular Weight", "@{Molecular_Weight}"),
     ]
