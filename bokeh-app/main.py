@@ -1,3 +1,4 @@
+import glob
 from os.path import join, dirname
 
 import pandas as pd
@@ -11,7 +12,11 @@ from bokeh.transform import log_cmap
 
 import bokeh.plotting as bp
 
-def get_dataset(src, timepoint,selected=None):
+def get_dataset(timepoint,df=None,selected=None):
+    if df is not None:
+        src = df
+    else:
+        src = pd.read_pickle(cluster_select.value)
     out = src.query("min == {}".format(timepoint)).copy()
     out['log10p-value'] = -np.log10(out['p-value'].values)
 
@@ -62,10 +67,13 @@ def update(selected=None):
     timepoint = timepoints[timepoint_select.value]
     volc_plot.title.text = "Volcano plot @ {}min".format(timepoint)
 
-    src = get_dataset(df, timepoint,selected=selected)
+    src = get_dataset(timepoint,selected=selected)
     source.data.update(src.data)
 
 def tp_change(attrname, old, new):
+    update()
+
+def dataset_change(attrname, old, new):
     update()
 
 def selection_change(attrname, old, new):
@@ -76,31 +84,36 @@ def selection_change(attrname, old, new):
         data = data.iloc[selected, :]
     update(selected)
 
-timepoints = [2,4,6,8,10,20,30,45,60]
-timepoint = timepoints[4]
-
-timepoint_select = Slider(start=0,end=9,value=4,step=1,
+files = glob.glob('./bokeh-app/*.pk')
+cluster_select = Select(value=files[0],title='Dataset',options=files)
+timepoint_select = Slider(
+        start=0,end=9,value=4,step=1,
         title='Timepoint',
         )
 
 # Load data
-df = pd.read_pickle(join(dirname(__file__), 'tsne.pk'))
 print('loaded dataset')
+
+timepoints = [2,4,6,8,10,20,30,45,60]
+timepoint = timepoints[4]
+
+df = pd.read_pickle(cluster_select.value)
 
 mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values))
 
-source = get_dataset(df,timepoint)
+source = get_dataset(timepoint,df)
 
 # Make plots
 volc_plot = make_volcano_plot(source, "Volcano plot for @ {}min".format(timepoint))
 cluster_plot = make_cluster_plot(source, "Clustering")
 
 # Register callback funcs
+cluster_select.on_change('value', dataset_change)
 timepoint_select.on_change('value', tp_change)
 source.on_change('selected', selection_change)
 
 plots = row(volc_plot,cluster_plot)
-controls = row(timepoint_select)
+controls = row(timepoint_select,cluster_select)
 
 curdoc().add_root(column(plots,controls))
 curdoc().title = "Volcano"
