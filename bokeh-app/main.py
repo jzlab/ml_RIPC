@@ -9,15 +9,17 @@ from bokeh.layouts import row,column
 from bokeh.models import ColumnDataSource, Select, Span,Slider
 from bokeh.palettes import Plasma256
 from bokeh.transform import log_cmap
-from quilt.data.elijahc import ripc.clustering as cdat
+from quilt.data.elijahc import ripc
 
 import bokeh.plotting as bp
+
+cdat = ripc.clustering
 
 def get_dataset(timepoint,df=None,selected=None):
     if df is not None:
         src = df
     else:
-        src = getattr(cdat,cluster_select.value)
+        src = getattr(cdat,cluster_select.value)()
     out = src.query("min == {}".format(timepoint)).copy()
     out['log10p-value'] = -np.log10(out['p-value'].values)
 
