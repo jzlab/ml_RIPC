@@ -26,9 +26,16 @@ def get_dataset(timepoint,df=None,selected=None):
     return ColumnDataSource(data=out)
 
 def make_volcano_plot(source,title):
-    p = bp.figure(tools="pan,wheel_zoom,reset,save",
+    p = bp.figure(tools="pan,wheel_zoom,reset,save,hover",
                 toolbar_location=None,
                 x_range=(-6,6),y_range=(0,12))
+
+    p.hover.tooltips = [
+        ("Name","@Name"),
+        ("Molecular Weight", "@{Molecular_Weight}"),
+        ("Log2 Fold Change", "@log2fc_mean"),
+        ('p-value', '@{p-value}')
+    ]
 
     p.title.text = title
 
