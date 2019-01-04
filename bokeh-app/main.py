@@ -9,6 +9,7 @@ from bokeh.layouts import row,column
 from bokeh.models import ColumnDataSource, Select, Span,Slider
 from bokeh.palettes import Plasma256
 from bokeh.transform import log_cmap
+from quilt.data.elijahc import ripc.clustering as cdat
 
 import bokeh.plotting as bp
 
@@ -16,7 +17,7 @@ def get_dataset(timepoint,df=None,selected=None):
     if df is not None:
         src = df
     else:
-        src = pd.read_pickle(cluster_select.value)
+        src = getattr(cdat,cluster_select.value)
     out = src.query("min == {}".format(timepoint)).copy()
     out['log10p-value'] = -np.log10(out['p-value'].values)
 
@@ -58,7 +59,7 @@ def make_cluster_plot(source,title):
     p.hover.tooltips = [
         ("Molecular Weight", "@{Molecular_Weight}"),
     ]
-    p.circle('tsne_1','tsne_2', line_color=mapper, color=mapper, size=5,source=source)
+    p.circle('dim_1','dim_2', line_color=mapper, color=mapper, size=5,source=source)
     p.title.text = title
 
     return p
@@ -84,7 +85,7 @@ def selection_change(attrname, old, new):
         data = data.iloc[selected, :]
     update(selected)
 
-files = glob.glob('./bokeh-app/*.pk')
+files = list(vars(cdat)['_children'].keys())
 cluster_select = Select(value=files[0],title='Dataset',options=files)
 timepoint_select = Slider(
         start=0,end=9,value=4,step=1,
@@ -97,7 +98,7 @@ print('loaded dataset')
 timepoints = [2,4,6,8,10,20,30,45,60]
 timepoint = timepoints[4]
 
-df = pd.read_pickle(cluster_select.value)
+df = getattr(cdat,cluster_select.value)()
 
 mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values))
 
