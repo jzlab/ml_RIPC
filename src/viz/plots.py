@@ -37,3 +37,6 @@ def volcano_plot(volc_df,timepoint=2,xrange=(-4,4),yrange=(0,8),tools='pan,wheel
         bp.output_file(os.path.join(output_path,"volcano{}.html".format(timepoint)), title="Log2 Fold Change @ {}min".format(timepoint))
 
     return p
+
+def pair_timeseries():
+    
