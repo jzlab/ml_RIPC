@@ -1,2 +1,7 @@
+quilt
+scikit-learn==0.19.2
+scipy
+pandas
+matplotlib
+seaborn
 googledrivedownloader==0.3
-quilt==2.9.14
