@@ -1,2 +1,2 @@
 googledrivedownloader==0.3
-quilt
+quilt==2.9.14
