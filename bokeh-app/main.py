@@ -1,3 +1,4 @@
+import glob
 from os.path import join, dirname
 
 import pandas as pd
@@ -5,28 +6,29 @@ import numpy as np
 
 from bokeh.io import curdoc
 from bokeh.layouts import row,column
-from bokeh.models import ColumnDataSource, Select, Span
+from bokeh.models import ColumnDataSource, Select, Span,Slider
 from bokeh.palettes import Plasma256
 from bokeh.transform import log_cmap
 
 import bokeh.plotting as bp
 
+def get_dataset(timepoint,df=None,selected=None):
+    if df is not None:
+        src = df
+    else:
+        src = pd.read_pickle(cluster_select.value)
+    out = src.query("min == {}".format(timepoint)).copy()
+    out['log10p-value'] = -np.log10(out['p-value'].values)
 
-def get_dataset(src, timepoint):
-    df = src.query("min == {}".format(timepoint)).copy()
-    df['log10p-value'] = -np.log10(df['p-value'].values)
-    # Implement any data munging here
+    return ColumnDataSource(data=out)
 
-    return ColumnDataSource(data=df)
-
-def make_plot(source,title):
+def make_volcano_plot(source,title):
     p = bp.figure(tools="pan,wheel_zoom,reset,save",
                 toolbar_location=None,
                 x_range=(-6,6),y_range=(0,12))
 
     p.title.text = title
 
-    mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values))
 
     p.circle("log2fc_mean", "log10p-value", line_color=mapper,color=mapper,size=5,source=source)
     p.xaxis.axis_label = "Log_2 Fold Change"
@@ -51,29 +53,67 @@ def make_plot(source,title):
 
     return p
 
-def update_plot(attrname, old, new):
-    timepoint = timepoint_select.value
-    plot.title.text = "Volcano plot for @ {}min".format(timepoint)
+def make_cluster_plot(source,title):
+    p = bp.figure(tools='pan,lasso_select,save,reset,wheel_zoom', x_range=(-100,100), y_range=(-100,100))
+    p.hover.tooltips = [
+        ("Molecular Weight", "@{Molecular_Weight}"),
+    ]
+    p.circle('tsne_1','tsne_2', line_color=mapper, color=mapper, size=5,source=source)
+    p.title.text = title
 
-    src = get_dataset(df, timepoint)
+    return p
 
+def update(selected=None):
+    timepoint = timepoints[timepoint_select.value]
+    volc_plot.title.text = "Volcano plot @ {}min".format(timepoint)
+
+    src = get_dataset(timepoint,selected=selected)
     source.data.update(src.data)
 
-timepoint = 2
+def tp_change(attrname, old, new):
+    update()
 
-timepoint_select = Select(value=str(timepoint),
+def dataset_change(attrname, old, new):
+    update()
+
+def selection_change(attrname, old, new):
+    selected = source.selected.indices
+
+    data = tsne_df
+    if selected:
+        data = data.iloc[selected, :]
+    update(selected)
+
+files = glob.glob('./bokeh-app/*.pk')
+cluster_select = Select(value=files[0],title='Dataset',options=files)
+timepoint_select = Slider(
+        start=0,end=9,value=4,step=1,
         title='Timepoint',
-        options=[str(t) for t in [2,4,6,8,10,20,30,45,60]]
         )
 
-df = pd.read_pickle(join(dirname(__file__), 'ripc_fc.pk'))
+# Load data
 print('loaded dataset')
-source = get_dataset(df,timepoint)
-plot = make_plot(source, "Volcano plot for @ {}min".format(timepoint))
 
-timepoint_select.on_change('value', update_plot)
+timepoints = [2,4,6,8,10,20,30,45,60]
+timepoint = timepoints[4]
 
-controls = column(timepoint_select)
+df = pd.read_pickle(cluster_select.value)
 
-curdoc().add_root(row(plot,controls))
+mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values))
+
+source = get_dataset(timepoint,df)
+
+# Make plots
+volc_plot = make_volcano_plot(source, "Volcano plot for @ {}min".format(timepoint))
+cluster_plot = make_cluster_plot(source, "Clustering")
+
+# Register callback funcs
+cluster_select.on_change('value', dataset_change)
+timepoint_select.on_change('value', tp_change)
+source.on_change('selected', selection_change)
+
+plots = row(volc_plot,cluster_plot)
+controls = row(timepoint_select,cluster_select)
+
+curdoc().add_root(column(plots,controls))
 curdoc().title = "Volcano"
