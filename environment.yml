@@ -3,8 +3,13 @@ channels:
   - nodefaults
 dependencies:
   - python=3.5
+  - numpy
   #  - bokeh
   # - nbserverproxy
-  - pandas
   - scipy
-  - quilt
+  - pip:
+    - quilt
+    - pandas
+    - matplotlib
+    - seaborn
+      # - googledrivedownloader=0.3
