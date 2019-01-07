@@ -1,5 +1,5 @@
 # ml_RIPC
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=lab)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=tree)
 ## Introduction
 Remote Ischemic Preconditioning (RIPC) is transient mechanical interruption (via BP cuff) of distal organ (upper extremity).
 RIPC is thought to be protective of ischemia through inhibition of oxidation and inflammation.
@@ -23,4 +23,14 @@ Humoral factor transmitted from the ischemic limb to other tissues and organs. T
 
 ### Untargeted metabolomic features
 
-[![Untargeted features volcano gif](viz/ripc_volcano.gif)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=/proxy/5006/bokeh-app)
+#### Volcano plots at each timepoint
+
+[![Untargeted features volcano gif](viz/ripc_volcano.gif)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=/proxy/5006/bokeh-untargeted)
+
+#### Linked Volcano Isomap embedding Plots
+
+<img src='fig/figure_1.png' width='750'>
+
+#### Timeseries for each clustering group
+
+<img src='fig/figure_2.png' width='750'>
