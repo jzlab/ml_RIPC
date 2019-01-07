@@ -1,5 +1,5 @@
 # ml_RIPC
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=lab)
 ## Introduction
 Remote Ischemic Preconditioning (RIPC) is transient mechanical interruption (via BP cuff) of distal organ (upper extremity).
 RIPC is thought to be protective of ischemia through inhibition of oxidation and inflammation.

@@ -1,13 +1,14 @@
 name: ml_ripc
 dependencies:
-  - python=3.5
-  - numpy
-  - pandas
-  - matplotlib
-  - seaborn
   - bokeh
   - nbserverproxy
+  - numpy
   - scipy
+  - pandas
+  # - matplotlib
+  - ipython
+  - seaborn
   - pip:
     - quilt
+    - jupyterlab_launcher>=0.5.0
       # - googledrivedownloader=0.3
