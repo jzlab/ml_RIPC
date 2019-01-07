@@ -1,12 +1,25 @@
 # ml_RIPC
-## Analysis of human RIPC metabolites
-
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master)
+## Introduction
+Remote Ischemic Preconditioning (RIPC) is transient mechanical interruption (via BP cuff) of distal organ (upper extremity).
+RIPC is thought to be protective of ischemia through inhibition of oxidation and inflammation.
 
+RIPC's mechanism is thought to be both neuronal and humoral.
+![](viz/RIPC_overview.png)
 
-[Sex and RIPC metabolites](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?filepath=notebooks%2Fsex_differences.ipynb)
+Neuronal signaling is thought to occur via vagal nerves
 
-![](viz/ripc_volcano.gif)
+Humoral factor transmitted from the ischemic limb to other tissues and organs. The final effect of this factor is to prevent opening of mitochondrial permeability transition pore (MPTP) and prevents apoptosis
 
+## Dataset
+![](viz/sampling_protocol.png)
 
-[![Volcano](https://img.shields.io/badge/interactive-bokeh-brightgreen.svg?style=for-the-badge&logo=appveyor)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=/proxy/5006/bokeh-app)
+## Results
+
+### Targeted metabolites
+
+#### [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?filepath=notebooks%2Fsex_differences.ipynb) Sex and RIPC metabolites
+
+### Untargeted metabolomic features
+
+[![Untargeted features volcano gif](viz/ripc_volcano.gif)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=/proxy/5006/bokeh-app)
