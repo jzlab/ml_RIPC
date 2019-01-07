@@ -5,14 +5,15 @@ Remote Ischemic Preconditioning (RIPC) is transient mechanical interruption (via
 RIPC is thought to be protective of ischemia through inhibition of oxidation and inflammation.
 
 RIPC's mechanism is thought to be both neuronal and humoral.
-![](viz/RIPC_overview.png){:width="250px"}
+<img src="viz/RIPC_overview.png" width="750">
 
 Neuronal signaling is thought to occur via vagal nerves
 
 Humoral factor transmitted from the ischemic limb to other tissues and organs. The final effect of this factor is to prevent opening of mitochondrial permeability transition pore (MPTP) and prevents apoptosis
 
 ## Dataset
-![](viz/sampling_protocol.png)
+
+<img src="viz/sampling_protocol.png" width="750">
 
 ## Results
 
