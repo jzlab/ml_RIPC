@@ -1,0 +1,9 @@
+bokeh
+numpy
+scipy
+sklearn
+pandas
+nbserverproxy
+ipython
+seaborn
+quilt
