@@ -7,8 +7,8 @@ import numpy as np
 from bokeh.io import curdoc
 from bokeh.layouts import row,column
 from bokeh.models import ColumnDataSource, Select, Span,Slider,Range1d
-from bokeh.palettes import Plasma256
-from bokeh.transform import log_cmap
+from bokeh.palettes import Plasma256,Category10_5
+from bokeh.transform import log_cmap,linear_cmap
 from quilt.data.elijahc import ripc
 
 import bokeh.plotting as bp
@@ -28,6 +28,9 @@ def get_dataset(timepoint,df=None,selected=None):
         src = getattr(cdat,cluster_select.value)()
     out = src.query("min == {}".format(timepoint)).copy()
     out['log10p-value'] = -np.log10(out['p-value'].values)
+    if 'cluster_id' not in out.columns.values.tolist():
+        out['cluster_id']=0
+
     columns = [
         'Molecular_Weight',
         'dim_1',
@@ -35,6 +38,7 @@ def get_dataset(timepoint,df=None,selected=None):
         'log10p-value',
         'log2fc_mean',
         'min',
+        'cluster_id',
         'p-value']
 
     return ColumnDataSource(data=out[columns])
@@ -57,7 +61,7 @@ def make_volcano_plot(source,title):
     p.title.text = title
 
 
-    p.circle("log2fc_mean", "log10p-value", line_color=mapper,color=mapper,size=5,source=source)
+    p.circle("log2fc_mean", "log10p-value", line_color=mapper,color=mapper,size=5,source=source,name='volc_circle')
     p.xaxis.axis_label = "Log_2 Fold Change"
     p.yaxis.axis_label = "-log_10 p-value"
     p.axis.axis_label_text_font_style = "bold"
@@ -90,8 +94,9 @@ def make_cluster_plot(source,title):
 
     p.hover.tooltips = [
         ("Molecular Weight", "@{Molecular_Weight}"),
+        ("Group", "@cluster_id"),
     ]
-    p.circle('dim_1','dim_2', line_color=mapper, color=mapper, size=5,source=source)
+    p.circle('dim_1','dim_2', line_color=mapper, color=mapper, size=5,source=source,name='cluster_circle')
     p.title.text = title
 
     return p
@@ -124,12 +129,23 @@ def selection_change(attrname, old, new):
         data = data.iloc[selected, :]
     update(selected)
 
+def color_by_select_change(attrname, old, new):
+    print(old,new)
+    mapper = mappers[color_by_select.value]
+    vglyph = volc_plot.select(name='volc_circle')[0].glyph
+    cglyph = cluster_plot.select(name='cluster_circle')[0].glyph
+    cglyph.update(fill_color=mapper,line_color=mapper)
+    vglyph.update(fill_color=mapper,line_color=mapper)
+    update()
+
 files = list(vars(cdat)['_children'].keys())
 cluster_select = Select(value=files[0],title='Dataset',options=files)
 timepoint_select = Slider(
         start=0,end=9,value=4,step=1,
         title='Timepoint',
         )
+color_by = ['Molecular_Weight','cluster_id']
+color_by_select = Select(value=color_by[0],title='Color by:',options=color_by)
 
 # Load data
 print('loaded dataset')
@@ -139,7 +155,11 @@ timepoint = timepoints[4]
 
 df = getattr(cdat,cluster_select.value)()
 
-mapper = log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values))
+mappers = {
+    'Molecular_Weight':log_cmap(field_name='Molecular_Weight', palette=Plasma256 ,low=min(df['Molecular_Weight'].values) ,high=max(df['Molecular_Weight'].values)),
+    'cluster_id':linear_cmap(field_name='cluster_id',palette=Category10_5,low=0,high=4)
+}
+mapper = mappers[color_by_select.value]
 
 source = get_dataset(timepoint,df)
 
@@ -151,9 +171,10 @@ cluster_plot = make_cluster_plot(source, "Clustering")
 cluster_select.on_change('value', dataset_change)
 timepoint_select.on_change('value', tp_change)
 source.on_change('selected', selection_change)
+color_by_select.on_change('value',color_by_select_change)
 
 plots = row(volc_plot,cluster_plot)
-controls = row(timepoint_select,cluster_select)
+controls = row(timepoint_select,cluster_select,color_by_select)
 
 curdoc().add_root(column(plots,controls))
 curdoc().title = "Volcano"
