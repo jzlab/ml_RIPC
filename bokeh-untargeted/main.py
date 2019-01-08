@@ -6,7 +6,7 @@ import numpy as np
 
 from bokeh.io import curdoc
 from bokeh.layouts import row,column
-from bokeh.models import ColumnDataSource, Select, Span,Slider
+from bokeh.models import ColumnDataSource, Select, Span,Slider,Range1d
 from bokeh.palettes import Plasma256
 from bokeh.transform import log_cmap
 from quilt.data.elijahc import ripc
@@ -15,6 +15,12 @@ import bokeh.plotting as bp
 
 cdat = ripc.clustering
 
+def get_attr_range(source,attr,margin=0.0):
+    vals = source.data[attr]
+    src_min = min(vals)
+    src_max = max(vals)
+    return (src_min*(1.0+margin),src_max*(1.0+margin))
+
 def get_dataset(timepoint,df=None,selected=None):
     if df is not None:
         src = df
@@ -22,13 +28,24 @@ def get_dataset(timepoint,df=None,selected=None):
         src = getattr(cdat,cluster_select.value)()
     out = src.query("min == {}".format(timepoint)).copy()
     out['log10p-value'] = -np.log10(out['p-value'].values)
+    columns = [
+        'Molecular_Weight',
+        'dim_1',
+        'dim_2',
+        'log10p-value',
+        'log2fc_mean',
+        'min',
+        'p-value']
 
-    return ColumnDataSource(data=out)
+    return ColumnDataSource(data=out[columns])
 
 def make_volcano_plot(source,title):
-    p = bp.figure(tools="pan,wheel_zoom,reset,save,hover",
-                toolbar_location=None,
-                x_range=(-6,6),y_range=(0,12))
+    xr = get_attr_range(source,'log2fc_mean',margin=0.1)
+    yr = get_attr_range(source,'log10p-value',margin=0.1)
+
+    p = bp.figure(tools="pan,lasso_select,save,reset,wheel_zoom,hover",
+                # toolbar_location=None,
+                x_range=xr,y_range=(0,yr[1]))
 
     p.hover.tooltips = [
         ("Name","@Name"),
@@ -64,7 +81,13 @@ def make_volcano_plot(source,title):
     return p
 
 def make_cluster_plot(source,title):
-    p = bp.figure(tools='pan,lasso_select,save,reset,wheel_zoom', x_range=(-100,100), y_range=(-100,100))
+    xr = get_attr_range(source,'dim_1',margin=0.1)
+    yr = get_attr_range(source,'dim_2',margin=0.1)
+
+    TOOLS = 'pan,lasso_select,save,reset,wheel_zoom,hover'
+
+    p = bp.figure(tools=TOOLS, x_range=xr, y_range=yr)
+
     p.hover.tooltips = [
         ("Molecular Weight", "@{Molecular_Weight}"),
     ]
@@ -85,6 +108,13 @@ def tp_change(attrname, old, new):
 
 def dataset_change(attrname, old, new):
     update()
+    left,right = get_attr_range(source,'dim_1',0.1)
+    bot,top = get_attr_range(source,'dim_2',0.1)
+
+    cluster_plot.x_range.start = left
+    cluster_plot.x_range.end = right
+    cluster_plot.y_range.start = bot
+    cluster_plot.y_range.end = top
 
 def selection_change(attrname, old, new):
     selected = source.selected.indices
