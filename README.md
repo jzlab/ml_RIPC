@@ -18,3 +18,5 @@ Humoral factor transmitted from the ischemic limb to other tissues and organs. T
 ## Results
 
 [![Untargeted features volcano gif](viz/ripc_volcano.gif)](https://mybinder.org/v2/gh/jzlab/ml_RIPC/master?urlpath=/proxy/5006/bokeh-untargeted)
+
+![Fold change dynamics isomap embedding](doc/isomap_embedding.png)
